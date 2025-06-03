@@ -3,91 +3,55 @@ from tqdm import tqdm
 import argparse
 import os
 
-from utils.utils import read_words, read_prompt_template, response_lmstudio, parse_response, write_csv
+from utils.utils import get_anki_media_folder, read_words, read_prompt_template, response_lmstudio, parse_response, write_csv
 from utils.anki import add_note_to_anki, create_model_if_missing, ensure_deck_exists
 from utils.tts import generate_audio
 
-def get_anki_media_folder():
-    """Get the Anki media folder path by scanning for available profiles"""
-    import platform
-    
-    if platform.system() == "Windows":
-        base_path = os.path.expanduser("~/AppData/Roaming/Anki2")
-    elif platform.system() == "Darwin":  # macOS
-        base_path = os.path.expanduser("~/Library/Application Support/Anki2")
-    else:  # Linux
-        base_path = os.path.expanduser("~/.local/share/Anki2")
-    
-    if not os.path.exists(base_path):
-        print(f"Anki folder not found at: {base_path}")
-        return None
-    
-    # Scan for all profile folders
-    try:
-        profile_folders = [d for d in os.listdir(base_path) 
-                          if os.path.isdir(os.path.join(base_path, d))]
-        
-        if not profile_folders:
-            print(f"No profile folders found in: {base_path}")
-            return None
-        
-        # Look for media folders in each profile
-        available_profiles = []
-        for profile in profile_folders:
-            media_path = os.path.join(base_path, profile, "collection.media")
-            if os.path.exists(media_path):
-                available_profiles.append((profile, media_path))
-        
-        if not available_profiles:
-            print(f"No collection.media folders found in profiles: {profile_folders}")
-            return None
-        
-        # If multiple profiles exist, prefer "User 1" or take the first one
-        for profile_name, media_path in available_profiles:
-            if profile_name == "User 1":
-                print(f"Using Anki profile: {profile_name}")
-                return media_path
-        
-        # If "User 1" not found, use the first available profile
-        profile_name, media_path = available_profiles[0]
-        if len(available_profiles) > 1:
-            print(f"Multiple Anki profiles found: {[p[0] for p in available_profiles]}")
-            print(f"Using profile: {profile_name}")
-        else:
-            print(f"Using Anki profile: {profile_name}")
-        
-        return media_path
-        
-    except PermissionError:
-        print(f"Permission denied accessing: {base_path}")
-        return None
-    except Exception as e:
-        print(f"Error scanning Anki profiles: {e}")
-        return None
+def get_words_from_args(words_args, vocab_file):
+    """Get words from either command line arguments or file"""
+    if words_args:
+        print(f"Processing {len(words_args)} words from arguments: {', '.join(words_args)}")
+        return words_args
+    elif vocab_file and os.path.exists(vocab_file):
+        words = read_words(vocab_file)
+        print(f"Processing {len(words)} words from file: {vocab_file}")
+        return words
+    else:
+        raise ValueError("Either provide --words or use --vocab")
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--deck", default="test", help="Name of your deck on Anki")
-    parser.add_argument("--words", default="words.txt", help="Words list.txt")
+    parser = argparse.ArgumentParser(description="Generate Anki cards from words")
+    parser.add_argument("--deck", "-d", default="test", help="Name of your deck on Anki")
+
+    # Word input options - mutually exclusive group
+    word_group = parser.add_mutually_exclusive_group(required=True)
+    word_group.add_argument("--words", "-w", nargs="+", help="Words to generate cards for")
+    word_group.add_argument("--vocab", "-v", help="Path to vocabulary file")
+
     parser.add_argument("--template", default="prompt.template", help="LLM prompt for generating cards")
-    parser.add_argument("--push-to-anki", action="store_true", help="Push the generated cards to your deck automatically")
-    parser.add_argument("--audio", action="store_true", help="Generate TTS files")
+    parser.add_argument("--no-anki", action="store_true", help="Don't push the generated cards to Anki (default: cards are pushed)")
+    parser.add_argument("--no-audio", action="store_true", help="Don't generate TTS files (default: audio is generated)")
     parser.add_argument("--audio-folder", default="audio", help="Folder path for audio files")
     parser.add_argument("--anki-media-folder", help="Path to Anki media folder (auto-detected if not provided)")
-    parser.add_argument(
-        "--model",
-        default="meta-llama-3.1-8b-instruct",
-        help="Path or identifier for LMStudio model"
-        )
+    parser.add_argument("--model", default="meta-llama-3.1-8b-instruct", help="Path or identifier for LMStudio model")
     args = parser.parse_args()
 
-    words = read_words(args.words)
+    # Get words from arguments or file
+    try:
+        words = get_words_from_args(args.words, args.vocab)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return 1
+
+    push_to_anki = not args.no_anki
+    generate_tts = not args.no_audio
     prompt_template = read_prompt_template(args.template)
+
     results = []
 
     # Get Anki media folder
     anki_media_folder = None
-    if args.push_to_anki and args.audio:
+    if push_to_anki and generate_tts:
         if args.anki_media_folder:
             anki_media_folder = args.anki_media_folder
         else:
@@ -98,7 +62,7 @@ def main():
             print("Please specify --anki-media-folder manually or ensure Anki is installed.")
             anki_media_folder = None
 
-    if args.push_to_anki:
+    if push_to_anki:
         ensure_deck_exists(args.deck)
         create_model_if_missing("AnkiCardGen")
 
@@ -115,7 +79,7 @@ def main():
             print(f"Invalid output format for word '{word}', retrying...")
 
         audio_files = None
-        if args.audio and args.audio_folder:
+        if generate_tts and args.audio_folder:
             audio_files = {}
 
             # Clean filename - remove special characters    
@@ -132,7 +96,7 @@ def main():
                 audio_path = generate_audio(parsed[key], filename_base, args.audio_folder)
                 audio_files[f"Audio_Example_{idx}"] = audio_path
 
-        if args.push_to_anki:
+        if push_to_anki:
             # Fields dictionary must include all fields used in your Anki model
             fields = {
                 "Word": parsed["German"],

@@ -1,7 +1,64 @@
+import os
 import csv
-import ast
-import json
 from openai import OpenAI
+
+def get_anki_media_folder():
+    """Get the Anki media folder path by scanning for available profiles"""
+    import platform
+    
+    if platform.system() == "Windows":
+        base_path = os.path.expanduser("~/AppData/Roaming/Anki2")
+    elif platform.system() == "Darwin":  # macOS
+        base_path = os.path.expanduser("~/Library/Application Support/Anki2")
+    else:  # Linux
+        base_path = os.path.expanduser("~/.local/share/Anki2")
+    
+    if not os.path.exists(base_path):
+        print(f"Anki folder not found at: {base_path}")
+        return None
+    
+    # Scan for all profile folders
+    try:
+        profile_folders = [d for d in os.listdir(base_path) 
+                          if os.path.isdir(os.path.join(base_path, d))]
+        
+        if not profile_folders:
+            print(f"No profile folders found in: {base_path}")
+            return None
+        
+        # Look for media folders in each profile
+        available_profiles = []
+        for profile in profile_folders:
+            media_path = os.path.join(base_path, profile, "collection.media")
+            if os.path.exists(media_path):
+                available_profiles.append((profile, media_path))
+        
+        if not available_profiles:
+            print(f"No collection.media folders found in profiles: {profile_folders}")
+            return None
+        
+        # If multiple profiles exist, prefer "User 1" or take the first one
+        for profile_name, media_path in available_profiles:
+            if profile_name == "User 1":
+                print(f"Using Anki profile: {profile_name}")
+                return media_path
+        
+        # If "User 1" not found, use the first available profile
+        profile_name, media_path = available_profiles[0]
+        if len(available_profiles) > 1:
+            print(f"Multiple Anki profiles found: {[p[0] for p in available_profiles]}")
+            print(f"Using profile: {profile_name}")
+        else:
+            print(f"Using Anki profile: {profile_name}")
+        
+        return media_path
+        
+    except PermissionError:
+        print(f"Permission denied accessing: {base_path}")
+        return None
+    except Exception as e:
+        print(f"Error scanning Anki profiles: {e}")
+        return None
 
 def read_words(filename: str) -> list[str]:
     with open(filename, "r", encoding="utf-8") as f:

@@ -46,28 +46,67 @@ For now it only works for German because of strict Anki format-setup. Next updat
         - You do not need API keys since LMStudio runs locally.
 
 ## Usage
-Prepare a plain text file containing German words or phrases, one per line. (an example is provided as words.txt)
-Run the main script with options to generate cards and optionally push them to Anki:
 
-    ```bash
-    # Generate cards and push to Anki with audio
-    python main.py --deck "German Vocabulary" --push-to-anki --audio
+You can provide words or phrases in two ways:
 
-    # Generate cards only (only CSV output, no Anki push)
-    python main.py --deck "German Vocabulary"
+### Method 1: Direct Word Input
+Provide words directly as command line arguments using `--words` or `--w`:
+```bash
+# Single word
+python main.py --words Hund --deck "German Vocabulary"
+python main.py --w Hund --d "German Vocabulary"
 
-    # Use custom word list and template
-    python main.py --words "my_words.txt" --template "my_template.template" --deck "Advanced German"
+# Multiple words
+python main.py --words Hund Katze Vogel --deck "German Vocabulary"
+
+# Words with spaces (idioms/phrases) - use quotes
+python main.py --words "das Haus" "auf Deutsch" "guten Morgen"
+
+# Mix of single words and phrases
+python main.py --words Hund "das Auto" Katze "zum Beispiel"
+```
+
+### Method 2: Text File Input
+Prepare a plain text file containing German words or phrases, one per line (an example is provided as words.txt):
+```bash
+# Using file input
+python main.py --vocab words.txt --deck "German Vocabulary"
+python main.py --v words.txt --d "German Vocabulary"
+```
+
+### Common Usage Examples
+```bash
+# Default behavior: Generate cards with audio and push to Anki
+python main.py --words Hund Katze Vogel --deck "German Vocabulary"
+python main.py --w Hund Katze Vogel --d "German Vocabulary"
+
+# Generate cards but don't push to Anki (CSV output only)
+python main.py --words Hund Katze --no-anki
+
+# Generate cards without audio files
+python main.py --words Hund Katze --no-audio
+
+# Generate only CSV (no Anki, no audio)
+python main.py --words Hund Katze --no-anki --no-audio
+
+# Use custom template
+python main.py --words Hund Katze --template "my_template.template"
+```
+
+### Important Notes for Word Input
+- **Single words**: Just list them separated by spaces: `--words Hund Katze Vogel`
+- **Phrases/idioms with spaces**: Wrap each phrase in quotes: `--words "das Haus" "guten Morgen"`
+- **File format**: When using `--vocab`, put one word/phrase per line in the text file
 
 ### Command Line Options
-
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--deck` | `test` | Name of your Anki deck (created automatically if missing) |
-| `--words` | `words.txt` | Path to the file containing German words or phrases |
+| `--words`, `--w` | - | German words or phrases (space-separated, use quotes for phrases) |
+| `--vocab`, `--v` | - | Path to file containing German words or phrases (one per line) |
+| `--deck`, `--d` | `test` | Name of your Anki deck (created automatically if missing) |
 | `--template` | `prompt.template` | Path to your LLM prompt template file |
-| `--push-to-anki` | `False` | Automatically add generated cards to your Anki deck |
-| `--audio` | `False` | Generate TTS audio files for example sentences |
+| `--no-anki` | `False` | Don't push cards to Anki (default: cards are pushed) |
+| `--no-audio` | `False` | Don't generate TTS audio files (default: audio is generated) |
 | `--audio-folder` | `audio` | Local folder to store generated audio files |
 | `--anki-media-folder` | Auto-detected | Path to Anki's media folder (usually auto-detected) |
 | `--model` | `meta-llama-3.1-8b-instruct` | Path or identifier for LMStudio quantized model |
