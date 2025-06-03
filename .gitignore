@@ -5,3 +5,7 @@
 /venv/
 /__pycache__
 /utils/__pycache__
+
+*.csv
+*.txt
+
