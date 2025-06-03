@@ -1,6 +1,7 @@
 # Ignore audio files folder
 /audio/
 
-# Ignore Python virtual environment
+# Ignore venv
 /venv/
 /__pycache__
+/utils/__pycache__

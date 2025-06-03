@@ -22,7 +22,7 @@ def main():
 
     if args.push_to_anki:
         ensure_deck_exists(args.deck)
-        create_model_if_missing("German")
+        create_model_if_missing("AnkiCardGen")
 
     for word in tqdm(words, desc="Generating cards"):
         while True:
@@ -49,7 +49,6 @@ def main():
             fields = {
                 "German": parsed["German"],
                 "English": parsed["English"],
-                "Definition": parsed.get("Definition", ""),
                 "Example 1 (DE)": parsed.get("Example 1 (DE)", ""),
                 "Example 1 (EN)": parsed.get("Example 1 (EN)", ""),
                 "Example 2 (DE)": parsed.get("Example 2 (DE)", ""),
@@ -58,6 +57,7 @@ def main():
 
             res = add_note_to_anki(
                 deck_name=args.deck,
+                model_name="AnkiCardGen",
                 fields=fields,
                 audio_files=audio_files,
                 tags=["auto"],
