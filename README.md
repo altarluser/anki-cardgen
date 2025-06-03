@@ -39,6 +39,7 @@ For now it only works for German because of strict Anki format-setup. Next updat
 5. Set up a local API.
     - Download & Launch LMStudio and open the **Model Hub**.  
     - Search for the model named: `lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF`  
+        - You can choose any versions, Q8 works fine.      
     - Download the model to your local machine. 
     - Start the LMStudio API Server
         - You can start the server from the Developer tab. It runs on 'http://127.0.0.1:1234'
@@ -69,3 +70,4 @@ Run the main script with options to generate cards and optionally push them to A
 | `--audio` | `False` | Generate TTS audio files for example sentences |
 | `--audio-folder` | `audio` | Local folder to store generated audio files |
 | `--anki-media-folder` | Auto-detected | Path to Anki's media folder (usually auto-detected) |
+| `--model` | `meta-llama-3.1-8b-instruct` | Path or identifier for LMStudio quantized model |

@@ -2,6 +2,7 @@ from datetime import datetime
 from tqdm import tqdm
 import argparse
 import os
+
 from utils.utils import read_words, read_prompt_template, response_lmstudio, parse_response, write_csv
 from utils.anki import add_note_to_anki, create_model_if_missing, ensure_deck_exists
 from utils.tts import generate_audio
@@ -73,6 +74,11 @@ def main():
     parser.add_argument("--audio", action="store_true", help="Generate TTS files")
     parser.add_argument("--audio-folder", default="audio", help="Folder path for audio files")
     parser.add_argument("--anki-media-folder", help="Path to Anki media folder (auto-detected if not provided)")
+    parser.add_argument(
+        "--model",
+        default="meta-llama-3.1-8b-instruct",
+        help="Path or identifier for LMStudio model"
+        )
     args = parser.parse_args()
 
     words = read_words(args.words)
@@ -98,7 +104,7 @@ def main():
 
     for word in tqdm(words, desc="Generating cards"):
         while True:
-            response_text = response_lmstudio(word, prompt_template)
+            response_text = response_lmstudio(word, prompt_template, model=args.model)
             parsed = parse_response(response_text)
             
             # Check that required fields are non-empty
