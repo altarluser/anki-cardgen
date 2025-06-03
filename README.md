@@ -50,13 +50,13 @@ Run the main script with options to generate cards and optionally push them to A
 
     ```bash
     # Generate cards and push to Anki with audio
-    python main.py --deck German Vocabulary --push-to-anki --audio
+    python main.py --deck "German Vocabulary" --push-to-anki --audio
 
     # Generate cards only (only CSV output, no Anki push)
-    python main.py --deck German Vocabulary
+    python main.py --deck "German Vocabulary"
 
     # Use custom word list and template
-    python main.py --words "my_words.txt" --template "my_template.template" --deck Advanced German
+    python main.py --words "my_words.txt" --template "my_template.template" --deck "Advanced German"
 
 ### Command Line Options
 
