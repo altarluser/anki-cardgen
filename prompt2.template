@@ -1,10 +1,16 @@
 Create Anki cards for the given German word or idiom with their English translations.
-You MUST create ONLY ONE card for the given word.
-You MUST respond ONLY with the exact format below, with NO extra words or sentences.
-Do NOT create multiple cards. Do NOT continue after Example 2 (EN).
-STOP immediately after the second English example.
 
-Output format (follow exactly):
+You MUST respond ONLY with the exact format below, with NO extra words or sentences.
+
+The output MUST start with the line beginning exactly as: German:
+
+If the output does not start exactly with "German:", it is invalid.
+
+Do NOT invent or add any new words or explanations.
+Do NOT output multiple cards or any extra text.
+
+Output format (please follow exactly):
+
 German: [Word]
 English: [English translation or definition]
 Example 1 (DE): [Example sentence in formal German]
@@ -12,7 +18,8 @@ Example 1 (EN): [English translation of Example 1]
 Example 2 (DE): [Example sentence in informal German or a different context]
 Example 2 (EN): [English translation of Example 2]
 
-Example of correct output:
+Example:
+
 German: auswendig lernen
 English: to learn by heart, to memorize
 Example 1 (DE): Der Schüler hat sein Vortrag auswendig gelernt.
@@ -20,11 +27,13 @@ Example 1 (EN): The student has learned his speech by heart.
 Example 2 (DE): Ich muss mein Gedicht für die Prüfung auswendig lernen.
 Example 2 (EN): I need to memorize my poem for the exam.
 
-CRITICAL RULES:
-- Create ONLY ONE card for the word: {}
-- Your response must end after "Example 2 (EN):"
+Important notes:
+
+- ONLY output the data exactly as above with the same keys and labels.
+- DO NOT include any extra text such as “Next word” or explanations.
 - DO NOT use markdown or formatting (no bold, italics, lists, or quotes).
 - Provide examples in both formal and informal contexts to show different usage.
 - If the word is an adverb/conjunction, make sure it has two sentences together, since they work as a connector.
-- Do NOT add more cards or examples
-- Do NOT continue with other German words
+- The output must strictly follow this exact format with no deviations.
+
+Start with the next word: {}

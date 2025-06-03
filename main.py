@@ -108,6 +108,7 @@ def main():
             parsed = parse_response(response_text)
             
             # Check that required fields are non-empty
+            #required_keys = ["Word", "Meaning", "Example_1", "Translation_1", "Example_2", "Translation_2"]
             required_keys = ["German", "English", "Example 1 (DE)", "Example 1 (EN)", "Example 2 (DE)", "Example 2 (EN)"]
             if all(parsed.get(k) for k in required_keys):
                 break
@@ -116,25 +117,33 @@ def main():
         audio_files = None
         if args.audio and args.audio_folder:
             audio_files = {}
+
+            # Clean filename - remove special characters    
+            clean_word = parsed['German'].replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
+            # Generate audio for the main word
+            word_for_pronunciation = parsed['German'].split('(')[0].strip() # Clean word for pronunciation - remove parenthetical parts
+            word_audio_path = generate_audio(word_for_pronunciation, clean_word, args.audio_folder)
+            audio_files["Audio_Word"] = word_audio_path
+
+            # Generate audio for the examples
             for idx in [1, 2]:
                 key = f"Example {idx} (DE)"
-                # Clean filename - remove special characters
-                clean_german = parsed['German'].replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
-                filename_base = f"{clean_german}_ex{idx}"
+                filename_base = f"{clean_word}_ex{idx}"
                 audio_path = generate_audio(parsed[key], filename_base, args.audio_folder)
-                audio_files[f"Audio Example {idx}"] = audio_path
+                audio_files[f"Audio_Example_{idx}"] = audio_path
 
         if args.push_to_anki:
             # Fields dictionary must include all fields used in your Anki model
             fields = {
-                "German": parsed["German"],
-                "English": parsed["English"],
-                "Example 1 (DE)": parsed.get("Example 1 (DE)", ""),
-                "Example 1 (EN)": parsed.get("Example 1 (EN)", ""),
-                "Example 2 (DE)": parsed.get("Example 2 (DE)", ""),
-                "Example 2 (EN)": parsed.get("Example 2 (EN)", ""),
-                "Audio Example 1": "",  # These will be filled by Anki
-                "Audio Example 2": ""
+                "Word": parsed["German"],
+                "Meaning": parsed["English"],
+                "Example_1": parsed.get("Example 1 (DE)", ""),
+                "Translation_1": parsed.get("Example 1 (EN)", ""),
+                "Example_2": parsed.get("Example 2 (DE)", ""),
+                "Translation_2": parsed.get("Example 2 (EN)", ""),
+                "Audio_Word": "", # These will be filled by Anki
+                "Audio_Example_1": "",  
+                "Audio_Example_2": ""
             }
 
             res = add_note_to_anki(
@@ -143,7 +152,7 @@ def main():
                 fields=fields,
                 audio_files=audio_files,
                 tags=["auto"],
-                media_folder=anki_media_folder  # Pass the actual Anki media folder
+                media_folder=anki_media_folder 
             )
             
             if res.get("error"):

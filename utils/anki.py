@@ -20,8 +20,8 @@ def add_note_to_anki(deck_name, model_name, fields, audio_files=None, tags=None,
     # First check if note already exists (if duplicates not allowed)
     if not allow_duplicates:
         try:
-            # Search for existing notes with the same German word
-            search_query = f'"deck:{deck_name}" "German:{fields.get("German", "")}"'
+            # Search for existing notes with the same word
+            search_query = f'"deck:{deck_name}" "Word:{fields.get("Word", "")}"'
             search_res = requests.post("http://localhost:8765", json={
                 "action": "findNotes",
                 "version": 6,
@@ -29,7 +29,7 @@ def add_note_to_anki(deck_name, model_name, fields, audio_files=None, tags=None,
             }, timeout=10).json()
             
             if search_res.get("result") and len(search_res["result"]) > 0:
-                print(f"Note for '{fields.get('German', '')}' already exists, skipping...")
+                print(f"Note for '{fields.get('Word', '')}' already exists, skipping...")
                 return {"result": "skipped", "reason": "duplicate"}
                 
         except Exception as e:
@@ -98,10 +98,11 @@ def create_model_if_missing(model_name):
             return
 
         expected_fields = [
-            "German", "English",
-            "Example 1 (DE)", "Example 1 (EN)",
-            "Example 2 (DE)", "Example 2 (EN)",
-            "Audio Example 1", "Audio Example 2"
+            "Word", "Meaning",
+            "Example_1", "Translation_1",
+            "Example_2", "Translation_2",
+            "Audio_Word", "Audio_Example_1",
+            "Audio_Example_2"
         ]
         
         if model_name in res.get("result", []):
@@ -130,56 +131,57 @@ def create_model_if_missing(model_name):
         # Create the model since it doesn't exist
         templates = [
             {
-                "Name": "German to English",
-                "Front": "{{German}}",
+                "Name": "Target to Native",
+                "Front": "{{Word}}{{Audio_Word}}",
                 "Back": textwrap.dedent("""\
-                    <b>English:</b> {{English}}<br><br>
+                    {{Meaning}}
+                                        
+                    <hr id=answer>
 
-                    <b>Beispiel 1:</b><br>
-                    {{Example 1 (DE)}}<br>
-                    {{#Audio Example 1}}
-                    <audio controls>
-                        <source src="{{Audio Example 1}}" type="audio/mpeg">
-                    </audio>
-                    {{/Audio Example 1}}<br>
-                    <i>{{Example 1 (EN)}}</i><br><br>
+                    {{Example_1}}{{Audio_Example_1}} 
+                    <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                        Show Translation
+                    </button>
+                    <div style="display:none;">
+                        <i>{{Translation_1}}</i>
+                    </div><br><br>
 
-                    <b>Beispiel 2:</b><br>
-                    {{Example 2 (DE)}}<br>
-                    {{#Audio Example 2}}
-                    <audio controls>
-                        <source src="{{Audio Example 2}}" type="audio/mpeg">
-                    </audio>
-                    {{/Audio Example 2}}<br>
-                    <i>{{Example 2 (EN)}}</i><br><br>
+                    {{Example_2}}{{Audio_Example_2}}
+                    <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                        Show Translation
+                    </button>
+                    <div style="display:none;">
+                        <i>{{Translation_2}}</i>
+                    </div><br><br>
                 """),
             },
             {
-                "Name": "English to German",
-                "Front": "{{English}}",
+                "Name": "Native to Target",
+                "Front": "{{Meaning}}",
                 "Back": textwrap.dedent("""\
-                    <b>German:</b> {{German}}<br><br>
+                    {{Word}}{{Audio_Word}}
+                                        
+                    <hr id=answer>
 
-                    <b>Beispiel 1:</b><br>
-                    {{Example 1 (DE)}}<br>
-                    {{#Audio Example 1}}
-                    <audio controls>
-                        <source src="{{Audio Example 1}}" type="audio/mpeg">
-                    </audio>
-                    {{/Audio Example 1}}<br>
-                    <i>{{Example 1 (EN)}}</i><br><br>
+                    {{Example_1}}{{Audio_Example_1}} 
+                    <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                        Show Translation
+                    </button>
+                    <div style="display:none;">
+                        <i>{{Translation_1}}</i>
+                    </div><br><br>
 
-                    <b>Beispiel 2:</b><br>
-                    {{Example 2 (DE)}}<br>
-                    {{#Audio Example 2}}
-                    <audio controls>
-                        <source src="{{Audio Example 2}}" type="audio/mpeg">
-                    </audio>
-                    {{/Audio Example 2}}<br>
-                    <i>{{Example 2 (EN)}}</i><br><br>
+                    {{Example_2}}{{Audio_Example_2}}
+                    <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                        Show Translation
+                    </button>
+                    <div style="display:none;">
+                        <i>{{Translation_2}}</i>
+                    </div><br><br>
                 """),
             }
         ]
+
         
         css_style = """
         .card {
