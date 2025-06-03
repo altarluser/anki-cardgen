@@ -1,11 +1,10 @@
 from datetime import datetime
 from tqdm import tqdm
 import argparse
-import os
 
-from utils import read_words, read_prompt_template, response_lmstudio, parse_response, write_csv
-from anki import add_note_to_anki, create_model_if_missing, ensure_deck_exists
-from tts import generate_audio
+from utils.utils import read_words, read_prompt_template, response_lmstudio, parse_response, write_csv
+from utils.anki import add_note_to_anki, create_model_if_missing, ensure_deck_exists
+from utils.tts import generate_audio
 
 def main():
     parser = argparse.ArgumentParser()
@@ -64,7 +63,9 @@ def main():
                 tags=["auto"],
                 media_folder=args.audio_folder
             )
-            print(f"Added note to Anki: {res}")
+
+            if res.get("error"):
+                print(f"Failed to add note: {res['error']}")
 
         results.append(parsed)
 
