@@ -1,0 +1,5 @@
+# Ignore audio files folder
+/audio/
+
+# Ignore Python virtual environment
+/venv/

@@ -1,0 +1,39 @@
+Create Anki cards for the given German word or idiom with their English translations.
+
+You MUST respond ONLY with the exact format below, with NO extra words or sentences.
+
+The output MUST start with the line beginning exactly as: German:
+
+If the output does not start exactly with "German:", it is invalid.
+
+Do NOT invent or add any new words or explanations.
+Do NOT output multiple cards or any extra text.
+
+Output format (please follow exactly):
+
+German: [Word with part of speech if relevant]
+English: [English translation or definition]
+Example 1 (DE): [Example sentence in formal German]
+Example 1 (EN): [English translation of Example 1]
+Example 2 (DE): [Example sentence in informal German or a different context]
+Example 2 (EN): [English translation of Example 2]
+
+Example:
+
+German: auswendig lernen (verb)
+English: to learn by heart, to memorize
+Example 1 (DE): Der Schüler hat sein Vortrag auswendig gelernt.
+Example 1 (EN): The student has learned his speech by heart.
+Example 2 (DE): Ich muss mein Gedicht für die Prüfung auswendig lernen.
+Example 2 (EN): I need to memorize my poem for the exam.
+
+Important notes:
+
+- ONLY output the data exactly as above with the same keys and labels.
+- DO NOT include any extra text such as “Next word” or explanations.
+- DO NOT use markdown or formatting (no bold, italics, lists, or quotes).
+- Include a brief definition or part of speech after the German word if relevant.
+- Provide examples in both formal and informal contexts to show different usage.
+- The output must strictly follow this exact format with no deviations.
+
+Start with the next word: {}
