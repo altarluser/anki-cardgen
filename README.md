@@ -48,14 +48,24 @@ For now it only works for German because of strict Anki format-setup. Next updat
 Prepare a plain text file containing German words or phrases, one per line. (an example is provided as words.txt)
 Run the main script with options to generate cards and optionally push them to Anki:
 
-```bash
-python main.py --deck German --push-to-anki --audio
+    ```bash
+    # Generate cards and push to Anki with audio
+    python main.py --deck German Vocabulary --push-to-anki --audio
 
-Options:
+    # Generate cards only (only CSV output, no Anki push)
+    python main.py --deck German Vocabulary
 
-- --deck: Name of your Anki deck (created automatically if missing, default: test)
-- --words: Path to the file with German words or phrases (default: words.txt)
-- --template: Path to your prompt template file (default: prompt.template)
-- --push-to-anki: Automatically add generated cards to your Anki deck
-- --audio: Generate TTS audio for example sentences
-- --audio-folder: Path to store audio files (default: audio)
+    # Use custom word list and template
+    python main.py --words "my_words.txt" --template "my_template.template" --deck Advanced German
+
+### Command Line Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--deck` | `test` | Name of your Anki deck (created automatically if missing) |
+| `--words` | `words.txt` | Path to the file containing German words or phrases |
+| `--template` | `prompt.template` | Path to your LLM prompt template file |
+| `--push-to-anki` | `False` | Automatically add generated cards to your Anki deck |
+| `--audio` | `False` | Generate TTS audio files for example sentences |
+| `--audio-folder` | `audio` | Local folder to store generated audio files |
+| `--anki-media-folder` | Auto-detected | Path to Anki's media folder (usually auto-detected) |
